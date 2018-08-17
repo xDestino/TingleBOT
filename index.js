@@ -2,44 +2,10 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-
-//On join new server
-client.on("guildCreate", guild => {
-    const channel = guild.channels.find(c => c.name === "general");
-    let joinEmbed = new Discord.RichEmbed()
-    .setTitle("Invitation")
-    .setColor("#5fffcb")
-    .setDescription("Thank you for inviting me upon your guild, **" + guild.name + "**. I am glad to join your server and will make it a better place. If you ever experience errors or difficulties with me, don't hesitate and join the Support Server. Also, if you need help finding some commands, please use the command `/help`.\n**Cheers**! 🍷");
-
-    guild.createRole({
-      NAME: "Tingle",
-      COLOR: "BLUE",
-      PERMISSION: "ADMINISTRATOR",
-    });
-
-
-    if(!channel) return guild.members.get(guild.ownerID).send(joinEmbed);
-    channel.send(joinEmbed);
-});
-
 //Start-up message | Activity
 client.on("ready", () => {
   //Start-up message
   console.log("Tingle has loaded - 100%");
-
-  //Activity (Status, Presence)
-  setInterval(function() {
-    //If bot is in 1 server, change guilds to guild
-    if(client.guilds.size == 1){
-      client.user.setActivity("to /help in " + client.guilds.size + " guild. | Tingle", { type: "LISTENING" });
-    }
-
-    //If bot is in +2 server, change guild to guilds
-    if(client.guilds.size > 2){
-      client.user.setActivity("/help in " + client.guilds.size + " guilds. | Tingle", { type: "LISTENING" });
-    }
-
-  }, 5000);
 });
 
 //Basic setup
@@ -73,10 +39,6 @@ client.on("message", message => {
       message.channel.send("You may only use the ban command in a guild, " + sender + ".");
       return;
     }
-    if(cmd == prefix + "ping"){
-      message.channel.send("You may only use the ping command in a guild, " + sender + ".");
-      return;
-    }
   };
 
   //Commands - Format:
@@ -84,100 +46,11 @@ client.on("message", message => {
   //message.channel.send("Text!");
   //}
 
-  //If message is Tingle news channel - React with CheckMark emoji.
-  if(message.channel.id == "476060156094840832"){
-    if(message.content.includes("@everyone")){
-      message.react(CheckMark);
-      }
-  }
-
-  //RPS Commands - /rps
-  if(cmd == prefix + "rps"){
-    message.react("🗿");
-    message.react("📜");
-    message.react("✂");
-
-    let rpsEmbedS = new Discord.RichEmbed()
-    .setTitle("Rock, Paper, Scissors!")
-    .setColor("#5fffcb")
-    .setDescription(sender + ", lets play some Rock, Paper, Scissors! To start, react on any of the reactions on your message. Rock ( :moyai: ) **|** Paper ( :scroll: ) **|** Scissors ( :scissors: )");
-
-    message.channel.send(rpsEmbedS).then((msg => {
-      //Rock start
-      const rfilter = (reaction, user) => reaction.emoji.name === '🗿' && user.id === message.author.id;
-      const rcollector = message.createReactionCollector(rfilter, { time: 15000 });
-      const pfilter = (reaction, user) => reaction.emoji.name === '📜' && user.id === message.author.id;
-      const pcollector = message.createReactionCollector(pfilter, { time: 15000 });
-      const sfilter = (reaction, user) => reaction.emoji.name === '✂' && user.id === message.author.id;
-      const scollector = message.createReactionCollector(sfilter, { time: 15000 });
-
-      rcollector.on('collect', r => {
-        message.channel.send(r.emoji.name)
-        let botChoose = ["Rock ( :moyai: )\n\n\nWe tied!", "Paper ( :scroll: )\n\n\nI won!", "Scissors ( :scissors: )\n\n\nYou won!"];
-        let random = Math.floor((Math.random() * botChoose.length));
-
-        let rockEmbed = new Discord.RichEmbed()
-        .setTitle("Rock, Paper, Scissors!")
-        .setColor("#5fffcb")
-        .addField("You chose", "Rock ( :moyai: )")
-        .addField("I chose", botChoose[random]);
-
-        if(r.emoji.name == "📜") return;
-
-        return msg.edit(rockEmbed);
-      });
-      rcollector.on('end', collected => {
-        pcollector.on("collected", r => {
-          if(r.emoji.name == ":scroll:") return;
-        });
-      if(collected.size == 0) return message.channel.send(ErrorMark + " | " + sender + ", you did not react before 15 seconds. To retry, please use the command `/rps`.");
-
-      });
-      //Rock end
-
-      //Paper start
-
-      pcollector.on('collect', r => {
-        let botChoose = ["Rock ( :moyai: )\n\n\nYou won!", "Paper ( :scroll: )\n\n\nWe tied.", "Scissors ( :scissors: )\n\n\nI won!"];
-        let random = Math.floor((Math.random() * botChoose.length));
-
-        let paperEmbed = new Discord.RichEmbed()
-        .setTitle("Rock, Paper, Scissors!")
-        .setColor("#5fffcb")
-        .addField("You chose", "Paper ( :scroll: )")
-        .addField("I chose", botChoose[random]);
-
-        return msg.edit(paperEmbed);
-      });
-      pcollector.on('end', collected => {
-      if(collected.size == 0) return message.channel.send(ErrorMark + " | " + sender + ", you did not react before 15 seconds. To retry, please use the command `/rps`.");
-      });
-      //Paper end
-
-      //Rock start
-
-      scollector.on('collect', r => {
-        let botChoose = ["Rock ( :moyai: )\n\n\nI won!", "Paper ( :scroll: )\n\n\nI lost!", "Scissors ( :scissors: )\n\n\nWe tied."];
-        let random = Math.floor((Math.random() * botChoose.length));
-
-        let rockEmbed = new Discord.RichEmbed()
-        .setTitle("Rock, Paper, Scissors!")
-        .setColor("#5fffcb")
-        .addField("You chose", "Paper")
-        .addField("I chose", botChoose[random]);
-
-        return msg.edit(rockEmbed);
-      });
-      scollector.on('end', collected => {
-      if(collected.size == 0) return message.channel.send(ErrorMark + " | " + sender + ", you did not react before 15 seconds. To retry, please use the command `/rps`.");
-      });
-      //Rock end
-    }));
-  }
 
 
   //Say Command - /say "text"
   if(cmd == prefix + "say"){
+     if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send(ErrorMark + ' | You do not have the permission "Manage Members" on this guild.' + sender + ".");
     if(!args[0]) return message.channel.send(ErrorMark + " | Please provide some text.");
     message.channel.send(args.join(" "));
   }
@@ -235,7 +108,7 @@ client.on("message", message => {
       message.channel.send(pingEmbedB).then((msg => {
         let pingEmbedA = new Discord.RichEmbed()
         .setTitle(":ping_pong: Pong!")
-        .setColor("#5fffcb")
+        .setColor("#F47B67")
         .setThumbnail("https://i.imgur.com/c1jeRzQ.png")
         .setDescription(`:arrow_forward: Latency: ${msg.createdTimestamp - message.createdTimestamp}ms.\n\n:signal_strength: API Latency: ` + Math.round(client.ping) + "ms.");
 
@@ -268,13 +141,13 @@ client.on("message", message => {
       let clearEmbedA = new Discord.RichEmbed()
       .setTitle("Clear")
       .setDescription("Succesfully deleted " + args[0] + " message out of the channel " + message.channel + ".")
-      .setColor("#5fffcb")
+      .setColor("#F47B67")
       .setThumbnail("https://i.imgur.com/bR6GZnZ.png");
 
       let clearEmbedB = new Discord.RichEmbed()
       .setTitle("Clear")
       .setDescription("Succesfully deleted " + args[0] + " messages out of the channel " + message.channel + ".")
-      .setColor("#5fffcb")
+      .setColor("#F47B67")
       .setThumbnail("https://i.imgur.com/bR6GZnZ.png");
 
       if(args[0] == "1"){
@@ -289,12 +162,7 @@ client.on("message", message => {
 
     }
 
-    if(cmd == prefix + "react"){
-          const filter = (reaction, user) => reaction.emoji.name === `${CheckMark}` && user.id === user
-        message.awaitReactions(filter, { time: 10000 })
-          .then(collected => console.log(`Collected ${collected.size} reactions`))
-          .catch(console.error);
-    }
+  
     //END
 
 
@@ -304,4 +172,4 @@ client.on("message", message => {
 
 
 //Client login
-client.login("NDcyNzQ1NTg4OTc5NjYyODQ4.DlLH6A.x-3lqpcieoOvu8pH74BXwRydhgo");
+client.login("NDgwMDgzNzEzMjUwODIwMTA3.Dliosg.I2c8ASPrZjxMBsFi0QiQZDH13aU");
